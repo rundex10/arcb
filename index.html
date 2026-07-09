@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Personal Vault</title>
+
+<link rel="stylesheet" href="style.css">
+
+<script src="https://cdn.jsdelivr.net/npm/ethers@6.13.1/dist/ethers.umd.min.js"></script>
+
+</head>
+
+<body>
+
+<div class="card">
+
+<h2>Personal Vault</h2>
+
+<p id="wallet">Wallet not connected</p>
+
+<button id="connect">
+Connect Wallet
+</button>
+
+<input
+id="amount"
+type="number"
+placeholder="Amount USDC"
+/>
+
+<select id="network">
+<option value="base">Base</option>
+<option value="ethereum">Ethereum</option>
+</select>
+
+<button id="send">
+Transfer USDC
+</button>
+
+<p id="status"></p>
+
+</div>
+
+<script src="app.js"></script>
+
+</body>
+</html>
