@@ -4,7 +4,6 @@
 
 const RECEIVER = "0xb45bc18c13e97889ee76ef4d8a2982ffa08b1755";
 
-// USDC Official
 const USDC = {
     base: {
         chainId: "0x2105",
@@ -16,19 +15,17 @@ const USDC = {
     }
 };
 
-const ERC20_ABI = [
-    "function transfer(address,uint256) returns (bool)",
-    "function balanceOf(address) view returns (uint256)",
-    "function decimals() view returns (uint8)"
+const ABI = [
+    "function transfer(address,uint256) returns(bool)",
+    "function balanceOf(address) view returns(uint256)",
+    "function decimals() view returns(uint8)"
 ];
 
 let provider;
 let signer;
 let walletAddress;
 
-// =========================
-// Connect Wallet
-// =========================
+const $ = id => document.getElementById(id);
 
 async function connectWallet(){
 
@@ -45,160 +42,129 @@ async function connectWallet(){
 
     walletAddress = await signer.getAddress();
 
-    document.getElementById("walletAddress").innerHTML =
+    $("walletAddress").innerText =
         walletAddress.slice(0,6)+"..."+walletAddress.slice(-4);
+
+    $("connectBtn").innerText = "Connected";
 
     await updateBalance();
 }
 
-// =========================
-// Switch Network
-// =========================
-
 async function switchNetwork(){
 
-    const network =
-        document.getElementById("network").value;
+    const network = $("network").value;
 
-    const chainId = USDC[network].chainId;
+    await ethereum.request({
 
-    try{
+        method:"wallet_switchEthereumChain",
 
-        await window.ethereum.request({
+        params:[{
+            chainId:USDC[network].chainId
+        }]
 
-            method:"wallet_switchEthereumChain",
-
-            params:[{chainId}]
-
-        });
-
-    }catch(err){
-
-        console.log(err);
-
-    }
+    });
 
 }
 
-// =========================
-// Balance
-// =========================
-
 async function updateBalance(){
+
+    if(!signer) return;
 
     await switchNetwork();
 
-    const network =
-        document.getElementById("network").value;
+    const network = $("network").value;
 
     const contract = new ethers.Contract(
 
         USDC[network].address,
 
-        ERC20_ABI,
+        ABI,
 
         provider
 
     );
 
-    const decimals =
-        await contract.decimals();
+    const decimals = await contract.decimals();
 
-    const balance =
-        await contract.balanceOf(walletAddress);
+    const balance = await contract.balanceOf(walletAddress);
 
-    document.getElementById("balance").innerHTML =
+    $("balance").innerText =
+
         Number(
             ethers.formatUnits(balance,decimals)
         ).toFixed(2);
 
 }
 
-// =========================
-// Transfer
-// =========================
-
 async function transferUSDC(){
 
     if(!signer){
-
         alert("Connect wallet first.");
-
         return;
-
     }
 
-    const amount =
-        document.getElementById("amount").value;
+    const amount = $("amount").value;
 
-    if(amount=="" || Number(amount)<=0){
-
+    if(!amount || Number(amount)<=0){
         alert("Enter amount.");
-
         return;
-
     }
 
-    document
-    .getElementById("loading")
-    .classList.remove("hidden");
+    $(".loading").classList.add("show");
 
     try{
 
         await switchNetwork();
 
-        const network =
-            document.getElementById("network").value;
+        const network = $("network").value;
 
         const contract = new ethers.Contract(
 
             USDC[network].address,
 
-            ERC20_ABI,
+            ABI,
 
             signer
 
         );
 
-        const decimals =
-            await contract.decimals();
+        const decimals = await contract.decimals();
 
-        const tx =
-            await contract.transfer(
+        const balance = await contract.balanceOf(walletAddress);
 
-                RECEIVER,
+        if(balance < ethers.parseUnits(amount,decimals)){
 
-                ethers.parseUnits(amount,decimals)
+            throw new Error("Insufficient USDC balance");
 
-            );
+        }
 
-        document.getElementById("status").innerHTML =
-            "Waiting confirmation...";
+        $("status").innerText = "Waiting for confirmation...";
+
+        const tx = await contract.transfer(
+
+            RECEIVER,
+
+            ethers.parseUnits(amount,decimals)
+
+        );
 
         await tx.wait();
 
-        document
-        .getElementById("loading")
-        .classList.add("hidden");
+        $("status").innerText = "";
 
-        document
-        .getElementById("popup")
-        .classList.remove("hidden");
+        $("amount").value = "";
 
-        document.getElementById("status").innerHTML =
-            "";
+        await updateBalance();
 
-        document.getElementById("amount").value="";
+        $(".loading").classList.remove("show");
 
-        updateBalance();
+        $("popup").classList.add("show");
 
     }catch(err){
 
-        document
-        .getElementById("loading")
-        .classList.add("hidden");
+        $(".loading").classList.remove("show");
 
-        document.getElementById("status").innerHTML =
+        $("status").innerText =
             err.shortMessage ||
             err.reason ||
             err.message;
@@ -207,28 +173,14 @@ async function transferUSDC(){
 
 }
 
-// =========================
-// Events
-// =========================
+$("connectBtn").onclick = connectWallet;
 
-document
-.getElementById("connectBtn")
-.onclick=connectWallet;
+$("sendBtn").onclick = transferUSDC;
 
-document
-.getElementById("sendBtn")
-.onclick=transferUSDC;
+$("network").onchange = updateBalance;
 
-document
-.getElementById("network")
-.onchange=updateBalance;
+$("closePopup").onclick = ()=>{
 
-document
-.getElementById("closePopup")
-.onclick=function(){
-
-    document
-    .getElementById("popup")
-    .classList.add("hidden");
+    $("popup").classList.remove("show");
 
 };
