@@ -1,8 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <title>Personal Vault</title>
 
 <link rel="stylesheet" href="style.css">
@@ -13,32 +15,86 @@
 
 <body>
 
-<div class="card">
+<div class="container">
 
-<h2>Personal Vault</h2>
+    <div class="card">
 
-<p id="wallet">Wallet not connected</p>
+        <h1>Personal Vault</h1>
 
-<button id="connect">
-Connect Wallet
-</button>
+        <p id="walletAddress">
+            Wallet not connected
+        </p>
 
-<input
-id="amount"
-type="number"
-placeholder="Amount USDC"
-/>
+        <button id="connectBtn">
+            Connect Wallet
+        </button>
 
-<select id="network">
-<option value="base">Base</option>
-<option value="ethereum">Ethereum</option>
-</select>
+        <div class="balanceBox">
+            <span>USDC Balance</span>
+            <h2 id="balance">0.00</h2>
+        </div>
 
-<button id="send">
-Transfer USDC
-</button>
+        <label>Network</label>
 
-<p id="status"></p>
+        <select id="network">
+
+            <option value="base">
+                Base
+            </option>
+
+            <option value="ethereum">
+                Ethereum
+            </option>
+
+        </select>
+
+        <label>Amount</label>
+
+        <input
+            id="amount"
+            type="number"
+            placeholder="0.00"
+            min="0"
+            step="0.01"
+        >
+
+        <button id="sendBtn">
+            Transfer USDC
+        </button>
+
+        <div id="status"></div>
+
+    </div>
+
+</div>
+
+<!-- Loading -->
+
+<div id="loading" class="loading hidden">
+
+    <div class="loader"></div>
+
+    <p>Preparing transaction...</p>
+
+</div>
+
+<!-- Success Popup -->
+
+<div id="popup" class="popup hidden">
+
+    <div class="popupCard">
+
+        <h2>✅ Success</h2>
+
+        <p>
+            USDC has been transferred.
+        </p>
+
+        <button id="closePopup">
+            Close
+        </button>
+
+    </div>
 
 </div>
 
